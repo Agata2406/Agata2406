@@ -1,0 +1,35 @@
+import requests
+
+def get_weather(station_name):
+    """Pobiera dane pogodowe z API IMGW dla podanej stacji."""
+    base_url = "https://danepubliczne.imgw.pl/api/data/synop"
+
+    try:
+        response = requests.get(base_url)
+        response.raise_for_status()  # Wyjątek w razie błędu HTTP
+        data = response.json()
+
+        # Filtruj dane dla wybranej stacji
+        station_data = next((item for item in data if item["stacja"].lower() == station_name.lower()), None)
+
+        if station_data:
+            temp = station_data["temperatura"]
+            pressure = station_data["cisnienie"]
+            humidity = station_data.get("wilgotnosc_wzgledna", "Brak danych")
+
+            print(f"Pogoda dla stacji: {station_name.capitalize()}:")
+            print(f"Temperatura: {temp} °C")
+            print(f"Ciśnienie: {pressure} hPa")
+            print(f"Wilgotność: {humidity} %")
+        else:
+            print(f"Nie znaleziono danych dla stacji: {station_name}.")
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"Błąd HTTP: {http_err}")
+    except Exception as err:
+        print(f"Inny błąd: {err}")
+
+if __name__ == "__main__":
+    station = input("Podaj nazwę stacji meteorologicznej: ")
+    get_weather(station)
+
